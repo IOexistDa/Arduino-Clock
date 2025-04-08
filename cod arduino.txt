@@ -125,7 +125,6 @@ int melody[] = {
 
 };
 
-// change this to make the song slower or faster
 int tempo = 114;
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -136,11 +135,8 @@ const int PIN_RED   = 6;
 const int PIN_GREEN = 5;
 const int PIN_BLUE  = 7;
 
-// sizeof gives the number of bytes, each int value is composed of two bytes (16 bits)
-// there are two values per note (pitch and duration), so for each note there are four bytes
 int notes = sizeof(melody) / sizeof(melody[0]) / 2;
 
-// this calculates the duration of a whole note in ms
 int wholenote = (60000 * 4) / tempo;
 
 int divider = 0, noteDuration = 0;
@@ -154,7 +150,6 @@ void updateRTC()
   lcd.setCursor(0, 0);
   lcd.print("Edit Mode...");
 
-  // ask user to enter new date and time
   const char txt[6][15] = { "year [4-digit]", "month [1~12]", "day [1~31]",
                             "hours [0~23]", "minutes [0~59]", "seconds [0~59]"};
   String str = "";
@@ -187,7 +182,7 @@ void updateRTC()
 
 void updateLCD()
 {
-  // get time and date from RTC and save in variables
+  // get time and date from RTC
   DateTime rtcTime = rtc.now();
 
   int ss = rtcTime.second();
@@ -202,7 +197,7 @@ void updateLCD()
 
   lcd.print("   ");
 
-  // print date in dd-MMM-yyyy format and day of week
+  // print date in dd-MMM-yyyy format
   if (dd < 10) lcd.print("0");  // add preceeding '0' if number is less than 10
   lcd.print(dd);
   lcd.print(".");
@@ -229,30 +224,22 @@ void updateLCD()
   lcd.print("     ");
 
   if(mm == 0){
-    // iterate over the notes of the melody.
-  // Remember, the array is twice the number of notes (notes + durations)
   for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
 
-    // calculates the duration of each note
     divider = melody[thisNote + 1];
     if (divider > 0) {
-      // regular note, just proceed
       noteDuration = (wholenote) / divider;
     } else if (divider < 0) {
-      // dotted notes are represented with negative durations!!
       noteDuration = (wholenote) / abs(divider);
       noteDuration *= 1.5; // increases the duration in half for dotted notes
     }
 
-    // we only play the note for 90% of the duration, leaving 10% as a pause
     tone(buzzer, melody[thisNote], noteDuration * 0.9);
 
-    // Wait for the specief duration before playing the next note.
     delay(noteDuration);
 
-    // stop the waveform generation before the next note.
     noTone(buzzer);
-  }     // Stop sound...
+  }    
   }
 }
 
@@ -298,10 +285,10 @@ void loop()
   delay(1000);
 
   float h = dht.readHumidity();
-  // Read temperature as Celsius (the default)
+  // Read temperature as Celsius
   float t = dht.readTemperature();
 
-  // Check if any reads failed and exit early (to try again).
+  // Check if any reads failed and exit early
   if (isnan(h) || isnan(t)) {
     Serial.println(F("Failed to read from DHT sensor!"));
     return;
@@ -312,11 +299,11 @@ void loop()
   Serial.print(F("%  Temperature: "));
   Serial.print(t);
 
-  lcd.setCursor(0,0);   //Set cursor to character 2 on line 0
+  lcd.setCursor(0,0); 
   lcd.print(t);
   lcd.print(" Celsius");
 
-  lcd.setCursor(0,1);   //Set cursor to character 2 on line 0
+  lcd.setCursor(0,1);  
   lcd.print("Humidity: ");
   lcd.print(h);
   lcd.print("%");
